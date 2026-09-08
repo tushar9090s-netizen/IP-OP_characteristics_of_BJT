@@ -13,10 +13,10 @@ class LearnTab extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xff183260), Color(0xff12213e)],
+              colors: [Color(0xff2d230e), Color(0xff1d170a)],
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xff2d4c82)),
+            border: Border.all(color: const Color(0xff574418)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +26,7 @@ class LearnTab extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xff2955b5),
+                      color: const Color(0xffd97706),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
@@ -35,7 +35,7 @@ class LearnTab extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const Text('ECE Laboratory Manual', style: TextStyle(color: Color(0xff92b4f2), fontSize: 11)),
+                  const Text('ECE Laboratory Manual', style: TextStyle(color: Color(0xfffacc15), fontSize: 11)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -46,7 +46,7 @@ class LearnTab extends StatelessWidget {
               const SizedBox(height: 6),
               const Text(
                 'Study of NPN Transistor (BC547) in Common Emitter (CE) Configuration',
-                style: TextStyle(fontSize: 12.5, color: Color(0xffb7ccee)),
+                style: TextStyle(fontSize: 12.5, color: Color(0xffd8cb9f)),
               ),
             ],
           ),
@@ -57,7 +57,7 @@ class LearnTab extends StatelessWidget {
         _sectionCard(
           title: 'Objective & Apparatus',
           icon: Icons.checklist_rounded,
-          accentColor: const Color(0xff88aaff),
+          accentColor: const Color(0xfffacc15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -69,7 +69,7 @@ class LearnTab extends StatelessWidget {
               _bulletPoint('1. Design the circuit diagram.'),
               _bulletPoint('2. Take the reading and draw the characteristics curve.'),
               _bulletPoint('3. Determine the input and output resistance.'),
-              const Divider(color: Color(0xff233554), height: 20),
+              const Divider(color: Color(0xff3d3216), height: 20),
               const Text(
                 'Equipment\'s Required:',
                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
@@ -92,7 +92,7 @@ class LearnTab extends StatelessWidget {
         _sectionCard(
           title: 'Theory',
           icon: Icons.menu_book_rounded,
-          accentColor: const Color(0xfff6ad55),
+          accentColor: const Color(0xfff59e0b),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -101,20 +101,20 @@ class LearnTab extends StatelessWidget {
                 'The Common Emitter (CE) configuration is most frequently encountered configuration. In this the emitter is common or reference to both the input and output terminals (in this case common to both the base and collector terminals). Two sets of characteristics are necessary to describe fully the behavior of the CE configuration: input and output characteristics.\n\n'
                 '• Input characteristics: The plot of base current IB versus the voltage VBE across its base and emitter for different values of voltage, VCE.\n\n'
                 '• Output characteristics: The plot of collector current IC versus the voltage VCE across its collector and emitter for different values of base current IB.',
-                style: TextStyle(color: Color(0xffb5c7e6), fontSize: 12.8, height: 1.45),
+                style: TextStyle(color: Color(0xffcfbf94), fontSize: 12.8, height: 1.45),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xff0b1526),
+                  color: const Color(0xff17140c),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xff1d3356)),
+                  border: Border.all(color: const Color(0xff3d3216)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Current Gain Definitions (From Manual):', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff88aaff), fontSize: 12)),
+                    const Text('Current Gain Definitions (From Manual):', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xfffacc15), fontSize: 12)),
                     const SizedBox(height: 8),
                     _mathRow('DC Mode Current Gain:', 'βdc = IC / IB'),
                     const SizedBox(height: 6),
@@ -131,7 +131,7 @@ class LearnTab extends StatelessWidget {
         _sectionCard(
           title: 'Laboratory Procedures',
           icon: Icons.format_list_numbered_rounded,
-          accentColor: const Color(0xff67d7b4),
+          accentColor: const Color(0xffeab308),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -144,7 +144,7 @@ class LearnTab extends StatelessWidget {
                   '4. Repeat for VCE (V2) = 2V.',
                   '5. Plot the input characteristics curve with VBE on x-axis and IB on y-axis.',
                 ],
-                color: const Color(0xfff6ad55),
+                color: const Color(0xfffacc15),
               ),
               const SizedBox(height: 14),
               _procedureBlock(
@@ -156,7 +156,7 @@ class LearnTab extends StatelessWidget {
                   '4. Repeat for IB = 10µA, by replacing R1 by 470 kilo Ohm.',
                   '5. Plot the output characteristics curve with VCE on x-axis and IC on y-axis.',
                 ],
-                color: const Color(0xff67d7b4),
+                color: const Color(0xfff59e0b),
               ),
             ],
           ),
@@ -167,7 +167,7 @@ class LearnTab extends StatelessWidget {
         _sectionCard(
           title: 'Formulas for Determining Resistance',
           icon: Icons.calculate_rounded,
-          accentColor: const Color(0xffb799f2),
+          accentColor: const Color(0xfffbbf24),
           child: Column(
             children: [
               _formulaTile(
@@ -197,9 +197,9 @@ class LearnTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xff101c30),
+        color: const Color(0xff1e1a12),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xff233554)),
+        border: Border.all(color: const Color(0xff42371c)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +226,7 @@ class LearnTab extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
         text,
-        style: const TextStyle(color: Color(0xffb5c7e6), fontSize: 12.5, height: 1.4),
+        style: const TextStyle(color: Color(0xffcfbf94), fontSize: 12.5, height: 1.4),
       ),
     );
   }
@@ -234,17 +234,17 @@ class LearnTab extends StatelessWidget {
   Widget _mathRow(String label, String formula) {
     return Row(
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xff8ea2c4))),
+        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xffbaa87e))),
         const SizedBox(width: 10),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: const Color(0xff162744),
+            color: const Color(0xff2c2410),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Text(
             formula,
-            style: const TextStyle(fontSize: 12, fontFamily: 'Courier', fontWeight: FontWeight.bold, color: Color(0xff9cc1ff)),
+            style: const TextStyle(fontSize: 12, fontFamily: 'Courier', fontWeight: FontWeight.bold, color: Color(0xfffde047)),
           ),
         ),
       ],
@@ -255,7 +255,7 @@ class LearnTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xff0a1526),
+        color: const Color(0xff17140c),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
@@ -266,7 +266,7 @@ class LearnTab extends StatelessWidget {
           const SizedBox(height: 8),
           ...steps.map((step) => Padding(
                 padding: const EdgeInsets.only(bottom: 5),
-                child: Text(step, style: const TextStyle(color: Color(0xffb5c7e6), fontSize: 12, height: 1.35)),
+                child: Text(step, style: const TextStyle(color: Color(0xffcfbf94), fontSize: 12, height: 1.35)),
               )),
         ],
       ),
@@ -277,7 +277,7 @@ class LearnTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xff0a1526),
+        color: const Color(0xff17140c),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -285,9 +285,9 @@ class LearnTab extends StatelessWidget {
         children: [
           Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12.5)),
           const SizedBox(height: 4),
-          Text(formula, style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, color: Color(0xff88aaff), fontSize: 12)),
+          Text(formula, style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, color: Color(0xfffacc15), fontSize: 12)),
           const SizedBox(height: 4),
-          Text(explanation, style: const TextStyle(color: Color(0xff8ea2c4), fontSize: 11.5)),
+          Text(explanation, style: const TextStyle(color: Color(0xffbaa87e), fontSize: 11.5)),
         ],
       ),
     );

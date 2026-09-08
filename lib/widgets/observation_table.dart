@@ -81,7 +81,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               : 'Logged reading at Vcc = ${widget.currentVcc.toStringAsFixed(0)}V, IB = ${widget.currentIbUa.toStringAsFixed(1)}µA',
         ),
         duration: const Duration(seconds: 2),
-        backgroundColor: const Color(0xff1f3d6e),
+        backgroundColor: const Color(0xff3d2c0a),
       ),
     );
   }
@@ -117,9 +117,9 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff101c30),
+        color: const Color(0xff1e1a12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xff233554)),
+        border: Border.all(color: const Color(0xff42371c)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +127,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
           // Header
           Row(
             children: [
-              const Icon(Icons.table_view_rounded, color: Color(0xfff6ad55), size: 20),
+              const Icon(Icons.table_view_rounded, color: Color(0xfffacc15), size: 20),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
@@ -138,7 +138,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xff1a2e4c),
+                  color: const Color(0xff2e2510),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -146,7 +146,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: widget.isInputMode ? const Color(0xfff6ad55) : const Color(0xff67d7b4),
+                    color: widget.isInputMode ? const Color(0xfffacc15) : const Color(0xfff59e0b),
                   ),
                 ),
               ),
@@ -164,7 +164,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                 icon: const Icon(Icons.add_task_rounded, size: 16),
                 label: const Text('Record Active Reading', style: TextStyle(fontSize: 12)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff2953b0),
+                  backgroundColor: const Color(0xffd97706),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -175,8 +175,8 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                 icon: const Icon(Icons.auto_awesome, size: 16),
                 label: const Text('Auto-Fill Lab Sheet', style: TextStyle(fontSize: 12)),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xff9cbcfc),
-                  side: const BorderSide(color: Color(0xff33528b)),
+                  foregroundColor: const Color(0xfffacc15),
+                  side: const BorderSide(color: Color(0xff574418)),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -198,7 +198,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               spacing: 8,
               runSpacing: 6,
               children: [
-                const Text('Select VCE Setting:', style: TextStyle(color: Color(0xffadc2e2), fontSize: 12)),
+                const Text('Select VCE Setting:', style: TextStyle(color: Color(0xffcfbf94), fontSize: 12)),
                 SegmentedButton<double>(
                   style: SegmentedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
@@ -222,7 +222,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               spacing: 8,
               runSpacing: 6,
               children: [
-                const Text('Select Base Current (IB):', style: TextStyle(color: Color(0xffadc2e2), fontSize: 12)),
+                const Text('Select Base Current (IB):', style: TextStyle(color: Color(0xffcfbf94), fontSize: 12)),
                 SegmentedButton<double>(
                   style: SegmentedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
@@ -257,21 +257,21 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
       borderRadius: BorderRadius.circular(10),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xff0c1626),
-          border: Border.all(color: const Color(0xff1d2f4a)),
+          color: const Color(0xff17140c),
+          border: Border.all(color: const Color(0xff3d3216)),
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            headingRowColor: WidgetStateProperty.all(const Color(0xff162740)),
+            headingRowColor: WidgetStateProperty.all(const Color(0xff2c2410)),
             horizontalMargin: 16,
             columnSpacing: 28,
             headingTextStyle: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color(0xfff6ad55),
+              color: Color(0xfffacc15),
               fontSize: 12,
             ),
-            dataTextStyle: const TextStyle(fontSize: 11.5, color: Color(0xffd4e2f8)),
+            dataTextStyle: const TextStyle(fontSize: 11.5, color: Color(0xffcfbf94)),
             columns: [
               const DataColumn(label: Text('Vbb (V1)')),
               DataColumn(label: Text('IB (mA)')),
@@ -287,7 +287,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
 
               return DataRow(
                 color: isCurrent
-                    ? WidgetStateProperty.all(const Color(0xff23375c))
+                    ? WidgetStateProperty.all(const Color(0xff382c10))
                     : null,
                 cells: [
                   DataCell(Text(vbb == 0.0 ? '0V' : '${vbb.toStringAsFixed(1)}V')),
@@ -298,7 +298,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                   DataCell(Text(reading != null ? '${reading.ibUa.toStringAsFixed(0)} µA' : '--')),
                   DataCell(Text(
                     reading != null ? '${reading.vbe.toStringAsFixed(3)} V' : '--',
-                    style: const TextStyle(color: Color(0xffe6a23c), fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: Color(0xfffacc15), fontWeight: FontWeight.bold),
                   )),
                   DataCell(Text(
                     reading == null
@@ -309,10 +309,10 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                     style: TextStyle(
                       fontSize: 10.5,
                       color: reading == null
-                          ? const Color(0xff6e82a4)
+                          ? const Color(0xff736647)
                           : reading.vbe < 0.65
                               ? const Color(0xffe57373)
-                              : const Color(0xff67d7b4),
+                              : const Color(0xffeab308),
                     ),
                   )),
                 ],
@@ -332,21 +332,21 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
       borderRadius: BorderRadius.circular(10),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xff0c1626),
-          border: Border.all(color: const Color(0xff1d2f4a)),
+          color: const Color(0xff17140c),
+          border: Border.all(color: const Color(0xff3d3216)),
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            headingRowColor: WidgetStateProperty.all(const Color(0xff162740)),
+            headingRowColor: WidgetStateProperty.all(const Color(0xff2c2410)),
             horizontalMargin: 16,
             columnSpacing: 28,
             headingTextStyle: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color(0xff67d7b4),
+              color: Color(0xfff59e0b),
               fontSize: 12,
             ),
-            dataTextStyle: const TextStyle(fontSize: 11.5, color: Color(0xffd4e2f8)),
+            dataTextStyle: const TextStyle(fontSize: 11.5, color: Color(0xffcfbf94)),
             columns: const [
               DataColumn(label: Text('VCC (V)')),
               DataColumn(label: Text('VCE (V)')),
@@ -361,13 +361,13 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
 
               return DataRow(
                 color: isCurrent
-                    ? WidgetStateProperty.all(const Color(0xff193a38))
+                    ? WidgetStateProperty.all(const Color(0xff362c10))
                     : null,
                 cells: [
                   DataCell(Text('${vcc.toInt()}V')),
                   DataCell(Text(
                     reading != null ? '${reading.vce.toStringAsFixed(2)} V' : '--',
-                    style: const TextStyle(color: Color(0xff67d7b4), fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: Color(0xfff59e0b), fontWeight: FontWeight.bold),
                   )),
                   DataCell(Text(
                     reading != null ? '${reading.icMa.toStringAsFixed(2)} mA' : '--',
@@ -382,10 +382,10 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                     style: TextStyle(
                       fontSize: 10.5,
                       color: reading == null
-                          ? const Color(0xff6e82a4)
+                          ? const Color(0xff736647)
                           : reading.vce < 0.3
-                              ? const Color(0xfff6ad55)
-                              : const Color(0xff67d7b4),
+                              ? const Color(0xfff59e0b)
+                              : const Color(0xffeab308),
                     ),
                   )),
                 ],
@@ -406,16 +406,16 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xff091424),
+        color: const Color(0xff17140c),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xff1c2f4c)),
+        border: Border.all(color: const Color(0xff3d3216)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.calculate_outlined, color: Color(0xff88aaff), size: 18),
+              const Icon(Icons.calculate_outlined, color: Color(0xfffacc15), size: 18),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
@@ -430,28 +430,28 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
             symbol: 'ri (Input Resistance)',
             formula: 'ri = (ΔVBE / ΔIB) | VCE=const',
             value: '${ri.toStringAsFixed(0)} Ω  (~${(ri / 1000).toStringAsFixed(2)} kΩ)',
-            color: const Color(0xfff6ad55),
+            color: const Color(0xfffacc15),
           ),
-          const Divider(color: Color(0xff172840), height: 14),
+          const Divider(color: Color(0xff3d3216), height: 14),
           _calcRow(
             symbol: 'ro (Output Resistance)',
             formula: 'ro = (ΔVCE / ΔIC) | IB=const',
             value: '${(ro / 1000).toStringAsFixed(1)} kΩ',
-            color: const Color(0xff67d7b4),
+            color: const Color(0xfff59e0b),
           ),
-          const Divider(color: Color(0xff172840), height: 14),
+          const Divider(color: Color(0xff3d3216), height: 14),
           _calcRow(
             symbol: 'βdc (DC Current Gain)',
             formula: 'βdc = IC / IB',
             value: '${betaDc.toStringAsFixed(0)}  (BC547 nominal)',
-            color: const Color(0xff8fb2f5),
+            color: const Color(0xfffbbf24),
           ),
-          const Divider(color: Color(0xff172840), height: 14),
+          const Divider(color: Color(0xff3d3216), height: 14),
           _calcRow(
             symbol: 'βac (AC Current Gain)',
             formula: 'βac = (ΔIC / ΔIB) | VCE=const',
             value: '~225  (from output curve family)',
-            color: const Color(0xffb799f2),
+            color: const Color(0xfffeee68),
           ),
         ],
       ),
@@ -474,7 +474,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(symbol, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.white)),
-            Text(formula, style: const TextStyle(fontSize: 10, color: Color(0xff7e96bc), fontFamily: 'Courier')),
+            Text(formula, style: const TextStyle(fontSize: 10, color: Color(0xffbaa87e), fontFamily: 'Courier')),
           ],
         ),
         Container(

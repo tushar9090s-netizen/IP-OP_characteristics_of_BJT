@@ -102,7 +102,7 @@ class _QuizTabState extends State<QuizTab> {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: const Color(0xff7742d4),
+                color: const Color(0xffd97706),
                 borderRadius: BorderRadius.circular(13),
               ),
               child: const Icon(Icons.quiz_rounded, color: Colors.white),
@@ -117,7 +117,7 @@ class _QuizTabState extends State<QuizTab> {
                     style: TextStyle(
                       letterSpacing: 2,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xffb799f2),
+                      color: Color(0xfffacc15),
                       fontSize: 11,
                     ),
                   ),
@@ -141,18 +141,18 @@ class _QuizTabState extends State<QuizTab> {
               gradient: LinearGradient(
                 colors: _score >= 4
                     ? [const Color(0xff164d36), const Color(0xff0d2b1f)]
-                    : [const Color(0xff4a2d16), const Color(0xff2d1b0c)],
+                    : [const Color(0xff3d280b), const Color(0xff261805)],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _score >= 4 ? const Color(0xff2e8b61) : const Color(0xffa15d2a),
+                color: _score >= 4 ? const Color(0xff2e8b61) : const Color(0xff8c5317),
               ),
             ),
             child: Row(
               children: [
                 Icon(
                   _score >= 4 ? Icons.check_circle_rounded : Icons.info_outline_rounded,
-                  color: _score >= 4 ? const Color(0xff67d7b4) : const Color(0xfff6ad55),
+                  color: _score >= 4 ? const Color(0xfffacc15) : const Color(0xfff59e0b),
                   size: 32,
                 ),
                 const SizedBox(width: 14),
@@ -169,7 +169,7 @@ class _QuizTabState extends State<QuizTab> {
                         _score >= 4
                             ? 'Excellent! You have mastered BJT characteristics.'
                             : 'Review the theory tab and give it another try!',
-                        style: const TextStyle(color: Color(0xffcbd7ea), fontSize: 12),
+                        style: const TextStyle(color: Color(0xffcfbf94), fontSize: 12),
                       ),
                     ],
                   ),
@@ -190,7 +190,7 @@ class _QuizTabState extends State<QuizTab> {
                   }
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff3f6be0),
+              backgroundColor: const Color(0xffd97706),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -213,8 +213,8 @@ class _QuizTabState extends State<QuizTab> {
             icon: const Icon(Icons.refresh_rounded),
             label: const Text('Retake Quiz'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xff8fb2f5),
-              side: const BorderSide(color: Color(0xff2d4c82)),
+              foregroundColor: const Color(0xfffacc15),
+              side: const BorderSide(color: Color(0xff574418)),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
@@ -231,9 +231,9 @@ class _QuizTabState extends State<QuizTab> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff101c30),
+        color: const Color(0xff1e1a12),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xff233554)),
+        border: Border.all(color: const Color(0xff42371c)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,10 +243,10 @@ class _QuizTabState extends State<QuizTab> {
             children: [
               CircleAvatar(
                 radius: 12,
-                backgroundColor: const Color(0xff1e3256),
+                backgroundColor: const Color(0xff362c12),
                 child: Text(
                   '${qIndex + 1}',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xff9cb8ec)),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xfffde047)),
                 ),
               ),
               const SizedBox(width: 10),
@@ -263,8 +263,8 @@ class _QuizTabState extends State<QuizTab> {
             final isChosen = selectedOption == optIndex;
             final isCorrect = q.correctIndex == optIndex;
 
-            Color borderColor = const Color(0xff233554);
-            Color bgColor = const Color(0xff0d1728);
+            Color borderColor = const Color(0xff3d3319);
+            Color bgColor = const Color(0xff17140c);
 
             if (_submitted) {
               if (isCorrect) {
@@ -275,8 +275,8 @@ class _QuizTabState extends State<QuizTab> {
                 bgColor = const Color(0xff3d1717);
               }
             } else if (isChosen) {
-              borderColor = const Color(0xff4e7bff);
-              bgColor = const Color(0xff182b52);
+              borderColor = const Color(0xffeab308);
+              bgColor = const Color(0xff382c10);
             }
 
             return Container(
@@ -305,10 +305,10 @@ class _QuizTabState extends State<QuizTab> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isChosen ? const Color(0xff6fa4ff) : const Color(0xff576e93),
+                            color: isChosen ? const Color(0xfffacc15) : const Color(0xff6e6042),
                             width: 1.5,
                           ),
-                          color: isChosen ? const Color(0xff3f6be0) : Colors.transparent,
+                          color: isChosen ? const Color(0xffeab308) : Colors.transparent,
                         ),
                         child: isChosen
                             ? const Icon(Icons.check, size: 12, color: Colors.white)
@@ -320,7 +320,7 @@ class _QuizTabState extends State<QuizTab> {
                           q.options[optIndex],
                           style: TextStyle(
                             fontSize: 12.5,
-                            color: isChosen ? Colors.white : const Color(0xffb0c2e0),
+                            color: isChosen ? Colors.white : const Color(0xffd6c8a4),
                             fontWeight: isChosen ? FontWeight.w600 : FontWeight.normal,
                           ),
                         ),
@@ -336,18 +336,18 @@ class _QuizTabState extends State<QuizTab> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xff091424),
+                color: const Color(0xff17140c),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.lightbulb_outline, size: 16, color: Color(0xfff6ad55)),
+                  const Icon(Icons.lightbulb_outline, size: 16, color: Color(0xfffacc15)),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       q.explanation,
-                      style: const TextStyle(fontSize: 11.5, color: Color(0xff9eb4d8), height: 1.3),
+                      style: const TextStyle(fontSize: 11.5, color: Color(0xffcfbf94), height: 1.3),
                     ),
                   ),
                 ],
