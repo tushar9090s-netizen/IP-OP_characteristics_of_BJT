@@ -260,6 +260,7 @@ class _QuizTabState extends State<QuizTab> {
                 _selectedAnswers.clear();
                 _submitted = false;
               });
+              widget.onQuizCompleted(0);
             },
             icon: const Icon(Icons.refresh_rounded),
             label: const Text('Retake Quiz'),

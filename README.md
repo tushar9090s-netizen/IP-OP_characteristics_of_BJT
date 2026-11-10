@@ -2,6 +2,11 @@
 
 An interactive, high-fidelity Flutter electronics laboratory application for studying the **Input and Output Characteristics of a Bipolar Junction Transistor (BJT)** in Common Emitter (CE) configuration, calibrated specifically for the **BC547 NPN** transistor according to laboratory curriculum standards.
 
+## Deployments
+
+- **Web app:** [Open the live BJT Characteristics lab](https://web-sage-phi-43.vercel.app)
+- **Android APK:** [Download version 1.0.0](dist/bjt-characteristics-1.0.0.apk) (debug-signed for sideloading and testing)
+
 ---
 
 ## 📋 Objectives (From Lab Manual)
@@ -48,9 +53,9 @@ Faithfully reproduces the two circuit diagrams from the laboratory manual:
 - **Output Result Table**:
   - $V_{CC}$ ($1\text{ V}, 2\text{ V}, 3\text{ V}, 4\text{ V}, 5\text{ V}, 6\text{ V}, 7\text{ V}, 8\text{ V}, 9\text{ V}, 10\text{ V}$) $\to$ $V_{CE}$ and $I_C$ for $I_B = 10\text{ }\mu\text{A}$ ($470\text{ k}\Omega$) and $I_B = 4.3\text{ }\mu\text{A}$ ($1\text{ M}\Omega$).
 - **One-Touch Actions**:
-  - **Record Active Reading**: Logs the active simulator slider values into the table.
-  - **Auto-Fill Lab Sheet**: Fills the complete table with standard experimental readings.
-  - **Clear**: Resets data table.
+  - **Record Active Reading**: Saves the current simulator reading into the matching table row.
+  - **Auto-Fill Lab Sheet**: Fills both input and output tables with standard simulated readings.
+  - **Clear**: Empties the saved tables. Readings persist locally on this device or browser; they are not synced between devices.
 
 ### 4. Dynamic Parameter Calculations
 Calculates and presents the exact parameters specified in the manual:
@@ -65,7 +70,7 @@ Calculates and presents the exact parameters specified in the manual:
 
 ### 5. Theory Guide & Checkpoint Quiz
 - **Learn Tab**: Verbatim lab manual theory, apparatus requirements, terminal descriptions, and step-by-step procedures for both experiments.
-- **Quiz Tab**: 6 concept checkpoint questions with instant feedback and comprehensive explanations.
+- **Quiz Tab**: 10 concept checkpoint questions with instant feedback and comprehensive explanations.
 - **Module Progress Tracker**: Dynamically tracks progress from baseline to 100% as the student conducts experiments, fills observation tables, and passes the quiz.
 
 ---
@@ -131,5 +136,5 @@ flutter analyze
 
 ## 🧪 Verification
 - `flutter analyze`: **0 issues found** (clean code, no warnings or lints).
-- `flutter test`: **8/8 unit & widget tests passed** covering physics calculations, Early effect, circuit equations, result tables, and UI navigation.
+- `flutter test`: **9/9 unit & widget tests passed** covering physics calculations, Early effect, circuit equations, result tables, quiz completion, and UI navigation.
 

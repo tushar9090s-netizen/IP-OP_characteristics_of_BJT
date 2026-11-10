@@ -60,7 +60,7 @@ class _LabHomeState extends State<LabHome> {
     if (_exploredInput) p += 0.10;
     if (_exploredOutput) p += 0.10;
     if (_recordedObservation) p += 0.10;
-    if (_quizScore >= 3) p += 0.10;
+    if (_quizScore >= 8) p += 0.10;
     return p.clamp(0.60, 1.0);
   }
 

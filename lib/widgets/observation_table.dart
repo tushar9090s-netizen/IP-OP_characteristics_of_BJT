@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/bjt_physics.dart';
 
 class ObservationTableWidget extends StatefulWidget {
@@ -30,6 +34,12 @@ class ObservationTableWidget extends StatefulWidget {
 }
 
 class _ObservationTableWidgetState extends State<ObservationTableWidget> {
+  static const _storageKey = 'bjt_characteristics.observation_tables.v1';
+
+  final SharedPreferencesAsync _preferences = SharedPreferencesAsync();
+  Future<void> _saveQueue = Future<void>.value();
+  bool _recordsLoaded = false;
+
   // Input tables data: Map<Vce, Map<Vbb, InputLabReading>>
   final Map<double, Map<double, InputLabReading>> _inputRecords = {
     1.0: {},
@@ -49,6 +59,142 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
   void initState() {
     super.initState();
     _populateDefaultTables();
+    _restoreSavedTables();
+  }
+
+  Future<void> _restoreSavedTables() async {
+    try {
+      final saved = await _preferences.getString(_storageKey);
+      if (saved == null) return;
+
+      final decoded = jsonDecode(saved);
+      if (decoded is! Map<String, dynamic> ||
+          decoded['input'] is! List ||
+          decoded['output'] is! List) {
+        throw const FormatException('Invalid saved observation tables');
+      }
+
+      final inputReadings = (decoded['input'] as List<dynamic>)
+          .map(_inputReadingFromJson)
+          .toList();
+      final outputReadings = (decoded['output'] as List<dynamic>)
+          .map(_outputReadingFromJson)
+          .toList();
+
+      if (!mounted) return;
+      setState(() {
+        for (final records in _inputRecords.values) {
+          records.clear();
+        }
+        for (final records in _outputRecords.values) {
+          records.clear();
+        }
+
+        for (final reading in inputReadings) {
+          final vceKey = (reading.vce - 1.0).abs() < 0.5 ? 1.0 : 2.0;
+          _inputRecords[vceKey]![reading.vbb] = reading;
+        }
+        for (final reading in outputReadings) {
+          final ibKey = (reading.ibUa - 4.3).abs() < 2.5 ? 4.3 : 10.0;
+          _outputRecords[ibKey]![reading.vcc] = reading;
+        }
+      });
+
+      if (inputReadings.isNotEmpty || outputReadings.isNotEmpty) {
+        widget.onRecordingMade?.call();
+      }
+    } catch (error) {
+      // Keep the standard tables available if local data is missing or invalid.
+      debugPrint('Could not restore saved observation tables: $error');
+    } finally {
+      if (mounted) setState(() => _recordsLoaded = true);
+    }
+  }
+
+  void _persistTables() {
+    final saved = jsonEncode({
+      'input': _inputRecords.values
+          .expand((records) => records.values)
+          .map(
+            (reading) => {
+              'vbb': reading.vbb,
+              'vce': reading.vce,
+              'ibMa': reading.ibMa,
+              'ibUa': reading.ibUa,
+              'vbe': reading.vbe,
+            },
+          )
+          .toList(),
+      'output': _outputRecords.values
+          .expand((records) => records.values)
+          .map(
+            (reading) => {
+              'vcc': reading.vcc,
+              'ibUa': reading.ibUa,
+              'vce': reading.vce,
+              'icMa': reading.icMa,
+            },
+          )
+          .toList(),
+    });
+
+    // Serialize writes so a slower earlier write cannot overwrite a newer table.
+    _saveQueue = _saveQueue.then((_) async {
+      try {
+        await _preferences.setString(_storageKey, saved);
+      } catch (error) {
+        debugPrint('Could not save observation tables: $error');
+      }
+    });
+  }
+
+  InputLabReading _inputReadingFromJson(Object? value) {
+    if (value is! Map<String, dynamic>) {
+      throw const FormatException('Invalid input reading');
+    }
+    double number(String key) {
+      final field = value[key];
+      if (field is num) return field.toDouble();
+      throw FormatException('Invalid input reading field: $key');
+    }
+
+    final reading = InputLabReading(
+      vbb: number('vbb'),
+      vce: number('vce'),
+      ibMa: number('ibMa'),
+      ibUa: number('ibUa'),
+      vbe: number('vbe'),
+    );
+    if (reading.vbb < 0 ||
+        reading.vbb > 5 ||
+        (reading.vce != 1.0 && reading.vce != 2.0)) {
+      throw const FormatException('Input reading is outside the lab range');
+    }
+    return reading;
+  }
+
+  OutputLabReading _outputReadingFromJson(Object? value) {
+    if (value is! Map<String, dynamic>) {
+      throw const FormatException('Invalid output reading');
+    }
+    double number(String key) {
+      final field = value[key];
+      if (field is num) return field.toDouble();
+      throw FormatException('Invalid output reading field: $key');
+    }
+
+    final reading = OutputLabReading(
+      vcc: number('vcc'),
+      ibUa: number('ibUa'),
+      vce: number('vce'),
+      icMa: number('icMa'),
+    );
+    if (reading.vcc < 1 ||
+        reading.vcc > 10 ||
+        (reading.ibUa != 4.3 && reading.ibUa != 10.0)) {
+      throw const FormatException('Output reading is outside the lab range');
+    }
+    return reading;
   }
 
   void _populateDefaultTables() {
@@ -89,6 +235,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
         );
       }
     });
+    _persistTables();
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -108,6 +255,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
     setState(() {
       _populateDefaultTables();
     });
+    _persistTables();
     widget.onRecordingMade?.call();
   }
 
@@ -118,6 +266,7 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
       _outputRecords[10.0]!.clear();
       _outputRecords[4.3]!.clear();
     });
+    _persistTables();
   }
 
   @override
@@ -135,12 +284,20 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
           // Header
           Row(
             children: [
-              const Icon(Icons.table_view_rounded, color: Color(0xff38bdf8), size: 20),
+              const Icon(
+                Icons.table_view_rounded,
+                color: Color(0xff38bdf8),
+                size: 20,
+              ),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'Lab Result Tables (Experiment 5)',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Color(0xfff1f5f9)),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    color: Color(0xfff1f5f9),
+                  ),
                 ),
               ),
               Container(
@@ -150,11 +307,15 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  widget.isInputMode ? 'Input Result Table' : 'Output Result Table',
+                  widget.isInputMode
+                      ? 'Input Result Table'
+                      : 'Output Result Table',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: widget.isInputMode ? const Color(0xff38bdf8) : const Color(0xff34d399),
+                    color: widget.isInputMode
+                        ? const Color(0xff38bdf8)
+                        : const Color(0xff34d399),
                   ),
                 ),
               ),
@@ -168,31 +329,54 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
             runSpacing: 8,
             children: [
               ElevatedButton.icon(
-                onPressed: _recordCurrentPoint,
+                onPressed: _recordsLoaded ? _recordCurrentPoint : null,
                 icon: const Icon(Icons.add_task_rounded, size: 16),
-                label: const Text('Record Active Reading', style: TextStyle(fontSize: 12)),
+                label: const Text(
+                  'Record Active Reading',
+                  style: TextStyle(fontSize: 12),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xff2563eb),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               OutlinedButton.icon(
-                onPressed: _fillAllTables,
+                onPressed: _recordsLoaded ? _fillAllTables : null,
                 icon: const Icon(Icons.auto_awesome, size: 16),
-                label: const Text('Auto-Fill Lab Sheet', style: TextStyle(fontSize: 12)),
+                label: const Text(
+                  'Auto-Fill Lab Sheet',
+                  style: TextStyle(fontSize: 12),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xff38bdf8),
                   side: const BorderSide(color: Color(0xff334155)),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               TextButton.icon(
-                onPressed: _clearTables,
-                icon: const Icon(Icons.refresh_rounded, size: 16, color: Color(0xfff87171)),
-                label: const Text('Clear', style: TextStyle(fontSize: 12, color: Color(0xfff87171))),
+                onPressed: _recordsLoaded ? _clearTables : null,
+                icon: const Icon(
+                  Icons.refresh_rounded,
+                  size: 16,
+                  color: Color(0xfff87171),
+                ),
+                label: const Text(
+                  'Clear',
+                  style: TextStyle(fontSize: 12, color: Color(0xfff87171)),
+                ),
               ),
             ],
           ),
@@ -206,7 +390,10 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               spacing: 8,
               runSpacing: 6,
               children: [
-                const Text('Select VCE Setting:', style: TextStyle(color: Color(0xff94a3b8), fontSize: 12)),
+                const Text(
+                  'Select VCE Setting:',
+                  style: TextStyle(color: Color(0xff94a3b8), fontSize: 12),
+                ),
                 SegmentedButton<double>(
                   style: SegmentedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
@@ -217,7 +404,8 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                     ButtonSegment(value: 2.0, label: Text('VCE = 2V')),
                   ],
                   selected: {_selectedInputVce},
-                  onSelectionChanged: (v) => setState(() => _selectedInputVce = v.first),
+                  onSelectionChanged: (v) =>
+                      setState(() => _selectedInputVce = v.first),
                 ),
               ],
             ),
@@ -230,7 +418,10 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               spacing: 8,
               runSpacing: 6,
               children: [
-                const Text('Select Base Current (IB):', style: TextStyle(color: Color(0xff94a3b8), fontSize: 12)),
+                const Text(
+                  'Select Base Current (IB):',
+                  style: TextStyle(color: Color(0xff94a3b8), fontSize: 12),
+                ),
                 SegmentedButton<double>(
                   style: SegmentedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
@@ -241,7 +432,8 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                     ButtonSegment(value: 4.3, label: Text('4.3 µA (1M)')),
                   ],
                   selected: {_selectedOutputIb},
-                  onSelectionChanged: (v) => setState(() => _selectedOutputIb = v.first),
+                  onSelectionChanged: (v) =>
+                      setState(() => _selectedOutputIb = v.first),
                 ),
               ],
             ),
@@ -279,7 +471,10 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               color: Color(0xff93c5fd),
               fontSize: 12,
             ),
-            dataTextStyle: const TextStyle(fontSize: 11.5, color: Color(0xffcbd5e1)),
+            dataTextStyle: const TextStyle(
+              fontSize: 11.5,
+              color: Color(0xffcbd5e1),
+            ),
             columns: [
               const DataColumn(label: Text('Vbb (V1)')),
               DataColumn(label: Text('IB (mA)')),
@@ -289,7 +484,8 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
             ],
             rows: vbbSteps.map((vbb) {
               final reading = records[vbb];
-              final isCurrent = (widget.currentVbb - vbb).abs() < 0.25 &&
+              final isCurrent =
+                  (widget.currentVbb - vbb).abs() < 0.25 &&
                   (widget.currentVce - vce).abs() < 0.5 &&
                   widget.isInputMode;
 
@@ -298,31 +494,52 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                     ? WidgetStateProperty.all(const Color(0xff1e293b))
                     : null,
                 cells: [
-                  DataCell(Text(vbb == 0.0 ? '0V' : '${vbb.toStringAsFixed(1)}V')),
-                  DataCell(Text(
-                    reading != null ? '${reading.ibMa.toStringAsFixed(3)} mA' : '--',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  )),
-                  DataCell(Text(reading != null ? '${reading.ibUa.toStringAsFixed(0)} µA' : '--')),
-                  DataCell(Text(
-                    reading != null ? '${reading.vbe.toStringAsFixed(3)} V' : '--',
-                    style: const TextStyle(color: Color(0xff38bdf8), fontWeight: FontWeight.bold),
-                  )),
-                  DataCell(Text(
-                    reading == null
-                        ? 'Pending'
-                        : reading.vbe < 0.65
-                            ? 'Cut-off'
-                            : 'Conduction',
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      color: reading == null
-                          ? const Color(0xff64748b)
-                          : reading.vbe < 0.65
-                              ? const Color(0xff94a3b8)
-                              : const Color(0xff38bdf8),
+                  DataCell(
+                    Text(vbb == 0.0 ? '0V' : '${vbb.toStringAsFixed(1)}V'),
+                  ),
+                  DataCell(
+                    Text(
+                      reading != null
+                          ? '${reading.ibMa.toStringAsFixed(3)} mA'
+                          : '--',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                  )),
+                  ),
+                  DataCell(
+                    Text(
+                      reading != null
+                          ? '${reading.ibUa.toStringAsFixed(0)} µA'
+                          : '--',
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      reading != null
+                          ? '${reading.vbe.toStringAsFixed(3)} V'
+                          : '--',
+                      style: const TextStyle(
+                        color: Color(0xff38bdf8),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      reading == null
+                          ? 'Pending'
+                          : reading.vbe < 0.65
+                          ? 'Cut-off'
+                          : 'Conduction',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: reading == null
+                            ? const Color(0xff64748b)
+                            : reading.vbe < 0.65
+                            ? const Color(0xff94a3b8)
+                            : const Color(0xff38bdf8),
+                      ),
+                    ),
+                  ),
                 ],
               );
             }).toList(),
@@ -354,7 +571,10 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
               color: Color(0xff6ee7b7),
               fontSize: 12,
             ),
-            dataTextStyle: const TextStyle(fontSize: 11.5, color: Color(0xffcbd5e1)),
+            dataTextStyle: const TextStyle(
+              fontSize: 11.5,
+              color: Color(0xffcbd5e1),
+            ),
             columns: const [
               DataColumn(label: Text('VCC (V)')),
               DataColumn(label: Text('VCE (V)')),
@@ -363,7 +583,8 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
             ],
             rows: vccSteps.map((vcc) {
               final reading = records[vcc];
-              final isCurrent = (widget.currentVcc - vcc).abs() < 0.5 &&
+              final isCurrent =
+                  (widget.currentVcc - vcc).abs() < 0.5 &&
                   (widget.currentIbUa - ibUa).abs() < 2.5 &&
                   !widget.isInputMode;
 
@@ -373,29 +594,42 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
                     : null,
                 cells: [
                   DataCell(Text('${vcc.toInt()}V')),
-                  DataCell(Text(
-                    reading != null ? '${reading.vce.toStringAsFixed(2)} V' : '--',
-                    style: const TextStyle(color: Color(0xff34d399), fontWeight: FontWeight.bold),
-                  )),
-                  DataCell(Text(
-                    reading != null ? '${reading.icMa.toStringAsFixed(2)} mA' : '--',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  )),
-                  DataCell(Text(
-                    reading == null
-                        ? 'Pending'
-                        : reading.vce < 0.3
-                            ? 'Saturation'
-                            : 'Active',
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      color: reading == null
-                          ? const Color(0xff64748b)
-                          : reading.vce < 0.3
-                              ? const Color(0xff60a5fa)
-                              : const Color(0xff34d399),
+                  DataCell(
+                    Text(
+                      reading != null
+                          ? '${reading.vce.toStringAsFixed(2)} V'
+                          : '--',
+                      style: const TextStyle(
+                        color: Color(0xff34d399),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )),
+                  ),
+                  DataCell(
+                    Text(
+                      reading != null
+                          ? '${reading.icMa.toStringAsFixed(2)} mA'
+                          : '--',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      reading == null
+                          ? 'Pending'
+                          : reading.vce < 0.3
+                          ? 'Saturation'
+                          : 'Active',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: reading == null
+                            ? const Color(0xff64748b)
+                            : reading.vce < 0.3
+                            ? const Color(0xff60a5fa)
+                            : const Color(0xff34d399),
+                      ),
+                    ),
+                  ),
                 ],
               );
             }).toList(),
@@ -449,12 +683,20 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
         children: [
           Row(
             children: [
-              const Icon(Icons.calculate_outlined, color: Color(0xff38bdf8), size: 18),
+              const Icon(
+                Icons.calculate_outlined,
+                color: Color(0xff38bdf8),
+                size: 18,
+              ),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'Calculations & Parameters (Experiment 5 Objective 3)',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xfff1f5f9)),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xfff1f5f9),
+                  ),
                 ),
               ),
             ],
@@ -507,8 +749,22 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(symbol, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xfff1f5f9))),
-            Text(formula, style: const TextStyle(fontSize: 10, color: Color(0xff94a3b8), fontFamily: 'Courier')),
+            Text(
+              symbol,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: Color(0xfff1f5f9),
+              ),
+            ),
+            Text(
+              formula,
+              style: const TextStyle(
+                fontSize: 10,
+                color: Color(0xff94a3b8),
+                fontFamily: 'Courier',
+              ),
+            ),
           ],
         ),
         Container(
@@ -520,7 +776,11 @@ class _ObservationTableWidgetState extends State<ObservationTableWidget> {
           ),
           child: Text(
             value,
-            style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
         ),
       ],
