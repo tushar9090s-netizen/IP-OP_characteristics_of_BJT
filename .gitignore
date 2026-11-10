@@ -74,3 +74,8 @@ app.*.map.json
 # Coverage
 coverage/
 
+# Widget Preview related
+.widget_preview/
+
+# Flutter-generated iOS integration files
+ios/Flutter/ephemeral/

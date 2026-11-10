@@ -25,11 +25,11 @@ class InputCurvePainter extends CustomPainter {
     final graphHeight = bottomMargin - topMargin;
 
     final gridPaint = Paint()
-      ..color = const Color(0xff1d2d48)
+      ..color = const Color(0xff1e293b)
       ..strokeWidth = 0.8;
 
     final axisPaint = Paint()
-      ..color = const Color(0xff3b5278)
+      ..color = const Color(0xff334155)
       ..strokeWidth = 1.5;
 
     // Y-axis grid lines and ticks (IB: 0 to 5 mA as in Experiment 5 with 1k resistor)
@@ -44,13 +44,13 @@ class InputCurvePainter extends CustomPainter {
         canvas,
         currentVal,
         Offset(leftMargin - 28, y - 6),
-        const TextStyle(color: Color(0xff889ec1), fontSize: 10, fontWeight: FontWeight.w600),
+        const TextStyle(color: Color(0xff94a3b8), fontSize: 10, fontWeight: FontWeight.w600),
       );
     }
 
-    // X-axis grid lines and ticks (VBE: 0.0 to 1.2 V as in Image 3)
-    const xMax = 1.2; // V
-    const xSteps = 6;
+    // X-axis grid lines and ticks (VBE: 0.0 to 1.0 V for focused conduction view)
+    const xMax = 1.0; // V (was 1.2V)
+    const xSteps = 5;
     for (int i = 0; i <= xSteps; i++) {
       final x = leftMargin + (graphWidth * i / xSteps);
       canvas.drawLine(Offset(x, topMargin), Offset(x, bottomMargin), gridPaint);
@@ -60,7 +60,7 @@ class InputCurvePainter extends CustomPainter {
         canvas,
         voltageVal,
         Offset(x - 8, bottomMargin + 8),
-        const TextStyle(color: Color(0xff889ec1), fontSize: 10, fontWeight: FontWeight.w600),
+        const TextStyle(color: Color(0xff94a3b8), fontSize: 10, fontWeight: FontWeight.w600),
       );
     }
 
@@ -73,20 +73,20 @@ class InputCurvePainter extends CustomPainter {
       canvas,
       'IB (mA)',
       const Offset(6, 4),
-      const TextStyle(color: Color(0xfff6ad55), fontSize: 11, fontWeight: FontWeight.w800),
+      const TextStyle(color: Color(0xff38bdf8), fontSize: 11, fontWeight: FontWeight.w700),
     );
     _drawText(
       canvas,
       'VBE (V) →',
       Offset(rightMargin - 46, bottomMargin + 14),
-      const TextStyle(color: Color(0xfff6ad55), fontSize: 11, fontWeight: FontWeight.w800),
+      const TextStyle(color: Color(0xff38bdf8), fontSize: 11, fontWeight: FontWeight.w700),
     );
 
     // Cut-in reference line (0.65 - 0.7 V)
     const kneeV = 0.68;
     final kneeX = leftMargin + (kneeV / xMax) * graphWidth;
     final kneePaint = Paint()
-      ..color = const Color(0xffe6a23c).withValues(alpha: 0.45)
+      ..color = const Color(0xff38bdf8).withValues(alpha: 0.35)
       ..strokeWidth = 1.2;
     _drawDashedLine(canvas, Offset(kneeX, topMargin + 25), Offset(kneeX, bottomMargin), kneePaint);
     _drawText(
@@ -94,10 +94,10 @@ class InputCurvePainter extends CustomPainter {
       'Cut-in ≈ 0.7V',
       Offset(kneeX - 25, topMargin + 10),
       const TextStyle(
-        color: Color(0xfff5b358),
+        color: Color(0xff7dd3fc),
         fontSize: 9.5,
-        fontWeight: FontWeight.bold,
-        backgroundColor: Color(0xbb101d32),
+        fontWeight: FontWeight.w600,
+        backgroundColor: Color(0xdd0f172a),
       ),
     );
 
@@ -105,9 +105,9 @@ class InputCurvePainter extends CustomPainter {
     for (final curveVce in [1.0, 2.0]) {
       final isCurrent = (selectedVce - curveVce).abs() < 0.5;
       final path = Path();
-      bool started = false;
 
-      // Sample 70 points from Vbb = 0 to 5.5 V
+      // Sample 70 points from VBB = 0 to 5.5 V.
+      final points = <Offset>[];
       for (int step = 0; step <= 70; step++) {
         final stepVbb = step * (5.5 / 70);
         final res = BjtPhysics.solveInputCircuit(vbb: stepVbb, vce: curveVce);
@@ -118,12 +118,36 @@ class InputCurvePainter extends CustomPainter {
         final clampedIb = math.min(yMax, ibVal);
         final y = bottomMargin - (clampedIb / yMax) * graphHeight;
 
-        if (!started) {
-          path.moveTo(x, y);
-          started = true;
-        } else {
-          path.lineTo(x, y);
-        }
+        points.add(Offset(x, y));
+      }
+
+      // Catmull-Rom control points keep the plotted samples smooth without
+      // changing their values or the graph's axis scaling.
+      if (points.isNotEmpty) {
+        path.moveTo(points.first.dx, points.first.dy);
+      }
+      for (int i = 0; i < points.length - 1; i++) {
+        final previous = points[i == 0 ? 0 : i - 1];
+        final current = points[i];
+        final next = points[i + 1];
+        final following = points[i + 2 < points.length ? i + 2 : points.length - 1];
+
+        final control1 = Offset(
+          current.dx + (next.dx - previous.dx) / 6,
+          current.dy + (next.dy - previous.dy) / 6,
+        );
+        final control2 = Offset(
+          next.dx - (following.dx - current.dx) / 6,
+          next.dy - (following.dy - current.dy) / 6,
+        );
+        path.cubicTo(
+          control1.dx,
+          control1.dy,
+          control2.dx,
+          control2.dy,
+          next.dx,
+          next.dy,
+        );
       }
 
       final curvePaint = Paint()
@@ -133,34 +157,41 @@ class InputCurvePainter extends CustomPainter {
 
       if (isCurrent) {
         curvePaint
-          ..color = const Color(0xfff6ad55)
+          ..color = const Color(0xff38bdf8)
           ..strokeWidth = 2.8;
 
         final glowPaint = Paint()
           ..style = PaintingStyle.stroke
-          ..color = const Color(0xfff6ad55).withValues(alpha: 0.25)
+          ..color = const Color(0xff38bdf8).withValues(alpha: 0.25)
           ..strokeWidth = 6.0;
         canvas.drawPath(path, glowPaint);
       } else {
         curvePaint
-          ..color = const Color(0xff577098)
+          ..color = const Color(0xff475569)
           ..strokeWidth = 1.4;
       }
 
       canvas.drawPath(path, curvePaint);
 
-      // Curve label tag at upper section
+      // Curve label tag with clean visual separation between VCE=1V and VCE=2V
       final endRes = BjtPhysics.solveInputCircuit(vbb: 5.0, vce: curveVce);
-      final tagY = bottomMargin - (math.min(yMax - 0.2, endRes['ibMa']!) / yMax) * graphHeight;
+      final tagY = bottomMargin - (math.min(yMax - 0.3, endRes['ibMa']!) / yMax) * graphHeight;
       final tagX = leftMargin + (math.min(xMax - 0.05, endRes['vbe']!) / xMax) * graphWidth;
+
+      final isVce1 = (curveVce == 1.0);
+      final labelOffset = isVce1
+          ? Offset(tagX - 58, tagY - 18)
+          : Offset(tagX + 8, tagY + 12);
+
       _drawText(
         canvas,
-        'VCE=${curveVce.toInt()}V',
-        Offset(tagX - 15, tagY - 14 - (curveVce == 1.0 ? 12 : 0)),
+        'VCE = ${curveVce.toInt()}V',
+        labelOffset,
         TextStyle(
-          color: isCurrent ? const Color(0xfff6ad55) : const Color(0xff758caa),
-          fontSize: 9,
-          fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w500,
+          color: isCurrent ? const Color(0xff38bdf8) : const Color(0xff64748b),
+          fontSize: 9.5,
+          fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+          backgroundColor: const Color(0xdd0f172a),
         ),
       );
     }
@@ -172,14 +203,14 @@ class InputCurvePainter extends CustomPainter {
 
     // Crosshairs
     final crosshairPaint = Paint()
-      ..color = const Color(0xfff6ad55).withValues(alpha: 0.5)
+      ..color = const Color(0xff38bdf8).withValues(alpha: 0.4)
       ..strokeWidth = 1.0;
     _drawDashedLine(canvas, Offset(leftMargin, qY), Offset(qX, qY), crosshairPaint);
     _drawDashedLine(canvas, Offset(qX, bottomMargin), Offset(qX, qY), crosshairPaint);
 
     // Q-point dot
     final qGlow = Paint()
-      ..color = const Color(0xfff6ad55).withValues(alpha: 0.3)
+      ..color = const Color(0xff38bdf8).withValues(alpha: 0.25)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(qX, qY), 9, qGlow);
 
@@ -189,25 +220,29 @@ class InputCurvePainter extends CustomPainter {
     canvas.drawCircle(Offset(qX, qY), 4.5, qDot);
 
     final qRing = Paint()
-      ..color = const Color(0xffe67e22)
+      ..color = const Color(0xff0284c7)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.2;
     canvas.drawCircle(Offset(qX, qY), 4.5, qRing);
 
     // Badge with coordinates
     final badgeText = 'Q: ${currentVbe.toStringAsFixed(3)}V, ${currentIbMa.toStringAsFixed(2)}mA';
-    final badgeX = (qX > rightMargin - 100) ? qX - 110 : qX + 10;
-    final badgeY = (qY < topMargin + 25) ? qY + 10 : qY - 22;
+    const badgeWidth = 118.0;
+    const badgeHeight = 18.0;
+    double badgeX = (qX > rightMargin - 125) ? qX - 130 : qX + 12;
+    double badgeY = (qY < topMargin + 25) ? qY + 12 : qY - 24;
+    badgeX = badgeX.clamp(leftMargin + 4, rightMargin - badgeWidth);
+    badgeY = badgeY.clamp(topMargin + 4, bottomMargin - badgeHeight);
 
     final badgeRRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(badgeX, badgeY, 110, 18),
+      Rect.fromLTWH(badgeX, badgeY, badgeWidth, badgeHeight),
       const Radius.circular(5),
     );
-    canvas.drawRRect(badgeRRect, Paint()..color = const Color(0xee162238));
+    canvas.drawRRect(badgeRRect, Paint()..color = const Color(0xee0f172a));
     canvas.drawRRect(
       badgeRRect,
       Paint()
-        ..color = const Color(0xfff6ad55)
+        ..color = const Color(0xff38bdf8)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0,
     );
@@ -216,7 +251,7 @@ class InputCurvePainter extends CustomPainter {
       canvas,
       badgeText,
       Offset(badgeX + 5, badgeY + 3.5),
-      const TextStyle(color: Color(0xfff6ad55), fontSize: 9, fontWeight: FontWeight.bold),
+      const TextStyle(color: Color(0xff38bdf8), fontSize: 9, fontWeight: FontWeight.bold),
     );
   }
 

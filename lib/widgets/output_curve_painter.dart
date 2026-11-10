@@ -32,16 +32,17 @@ class OutputCurvePainter extends CustomPainter {
       ..color = const Color(0xff3b5278)
       ..strokeWidth = 1.5;
 
-    // Saturation region background shading (0 to 2V) as in Image 4
-    final satWidth = (2.0 / 20.0) * graphWidth;
+    // Saturation region background shading (0 to 1.0V)
+    const xMax = 12.0; // V (scaled for 0-10V lab procedure with label margin)
+    final satWidth = (1.0 / xMax) * graphWidth;
     final satRect = Rect.fromLTWH(leftMargin, topMargin, satWidth, graphHeight);
     canvas.drawRect(satRect, Paint()..color = const Color(0xff4ea5d9).withValues(alpha: 0.12));
 
-    // Active region background shading (2 to 20V) as in Image 4
+    // Active region background shading (1.0 to 12V)
     final activeRect = Rect.fromLTWH(leftMargin + satWidth, topMargin, graphWidth - satWidth, graphHeight);
     canvas.drawRect(activeRect, Paint()..color = const Color(0xffd16ba5).withValues(alpha: 0.08));
 
-    // Saturation boundary line at 2V
+    // Saturation boundary line at 1.0V
     _drawDashedLine(
       canvas,
       Offset(leftMargin + satWidth, topMargin),
@@ -51,30 +52,42 @@ class OutputCurvePainter extends CustomPainter {
         ..strokeWidth = 1.0,
     );
 
-    // Y-axis grid lines and ticks (IC: 0 to 30 mA as in Image 4)
-    const yMax = 30.0;
+    // Y-axis grid lines and ticks (IC: 0 to 3.0 mA scaled for wide vertical separation of lab curves)
+    const yMax = 3.0; // mA (gives ~47% of total graph height vertical separation between 4.3uA and 10uA)
     const ySteps = 3;
     for (int i = 0; i <= ySteps; i++) {
       final y = bottomMargin - (graphHeight * i / ySteps);
       canvas.drawLine(Offset(leftMargin, y), Offset(rightMargin, y), gridPaint);
 
-      final currentVal = (i * 10).toString();
+      // Intermediate half-steps (dashed)
+      if (i < ySteps) {
+        final halfY = y - (graphHeight / (ySteps * 2));
+        _drawDashedLine(
+          canvas,
+          Offset(leftMargin, halfY),
+          Offset(rightMargin, halfY),
+          Paint()
+            ..color = const Color(0xff162238)
+            ..strokeWidth = 0.6,
+        );
+      }
+
+      final currentVal = (i * 1.0).toStringAsFixed(0);
       _drawText(
         canvas,
-        currentVal,
-        Offset(leftMargin - 22, y - 6),
+        '$currentVal.0',
+        Offset(leftMargin - 28, y - 6),
         const TextStyle(color: Color(0xff889ec1), fontSize: 10, fontWeight: FontWeight.w600),
       );
     }
 
-    // X-axis grid lines and ticks (Vce: 0 to 20 Volts as in Image 4)
-    const xMax = 20.0;
-    const xSteps = 4;
+    // X-axis grid lines and ticks (Vce: 0 to 12 Volts)
+    const xSteps = 6; // 0, 2, 4, 6, 8, 10, 12 V
     for (int i = 0; i <= xSteps; i++) {
       final x = leftMargin + (graphWidth * i / xSteps);
       canvas.drawLine(Offset(x, topMargin), Offset(x, bottomMargin), gridPaint);
 
-      final voltageVal = (i * 5).toString();
+      final voltageVal = (i * 2).toString();
       _drawText(
         canvas,
         voltageVal,
@@ -101,11 +114,14 @@ class OutputCurvePainter extends CustomPainter {
       const TextStyle(color: Color(0xff67d7b4), fontSize: 11, fontWeight: FontWeight.w800),
     );
 
-    // Family of Curves from Image 4: Ib = 50, 100, 150, 200, 250 uA + Lab curves (4.3uA, 10uA)
-    final ibCurves = [4.3, 10.0, 50.0, 100.0, 150.0, 200.0, 250.0];
+    // Family of Curves focused on the experiment with wide vertical separation:
+    // Lab curves: 4.3uA (1M) and 10.0uA (470k)
+    // Baseline reference: 1.5uA
+    final ibCurves = [1.5, 4.3, 10.0];
 
     for (final curveIb in ibCurves) {
       final isCurrent = (selectedIbUa - curveIb).abs() < 1.0;
+      final isLabCurve = (curveIb == 4.3 || curveIb == 10.0);
       final path = Path();
       bool started = false;
 
@@ -113,7 +129,7 @@ class OutputCurvePainter extends CustomPainter {
         final stepVce = step * (xMax / 80);
         // Base transistor active current in mA: beta * Ib with Early slope
         final icActive = (BjtPhysics.nominalBeta * curveIb) / 1000.0;
-        final satFactor = 1.0 - math.exp(-stepVce / 0.5);
+        final satFactor = 1.0 - math.exp(-stepVce / 0.35);
         final earlyFactor = 1.0 + (stepVce / BjtPhysics.earlyVoltageVa);
         final icVal = icActive * satFactor * earlyFactor;
 
@@ -137,34 +153,51 @@ class OutputCurvePainter extends CustomPainter {
       if (isCurrent) {
         curvePaint
           ..color = const Color(0xff67d7b4)
-          ..strokeWidth = 2.8;
+          ..strokeWidth = 3.0;
 
         final glowPaint = Paint()
           ..style = PaintingStyle.stroke
-          ..color = const Color(0xff67d7b4).withValues(alpha: 0.3)
-          ..strokeWidth = 6.0;
+          ..color = const Color(0xff67d7b4).withValues(alpha: 0.35)
+          ..strokeWidth = 7.0;
         canvas.drawPath(path, glowPaint);
+      } else if (isLabCurve) {
+        curvePaint
+          ..color = const Color(0xff4ca888).withValues(alpha: 0.75)
+          ..strokeWidth = 1.8;
       } else {
         curvePaint
-          ..color = curveIb <= 10.0
-              ? const Color(0xff7ca4d8).withValues(alpha: 0.8)
-              : const Color(0xff445f82).withValues(alpha: 0.5)
-          ..strokeWidth = 1.2;
+          ..color = const Color(0xff2d4766).withValues(alpha: 0.6)
+          ..strokeWidth = 1.0;
       }
 
       canvas.drawPath(path, curvePaint);
 
-      // Curve label tag on right
-      final icEnd = ((BjtPhysics.nominalBeta * curveIb) / 1000.0) * (1.0 + xMax / 100.0);
-      final tagY = bottomMargin - (math.min(yMax - 0.5, icEnd) / yMax) * graphHeight;
+      // Curve label tag on right margin with plenty of vertical spacing
+      final icEnd = ((BjtPhysics.nominalBeta * curveIb) / 1000.0) * (1.0 + xMax / BjtPhysics.earlyVoltageVa);
+      final tagY = bottomMargin - (math.min(yMax - 0.2, icEnd) / yMax) * graphHeight;
+
+      String tagLabel;
+      if (curveIb == 4.3) {
+        tagLabel = 'IB=4.3µA (1MΩ)';
+      } else if (curveIb == 10.0) {
+        tagLabel = 'IB=10µA (470kΩ)';
+      } else {
+        tagLabel = 'IB=${curveIb.toInt()}µA';
+      }
+
       _drawText(
         canvas,
-        'Ib=${curveIb.toInt()}µA',
-        Offset(rightMargin - 42, tagY - 6),
+        tagLabel,
+        Offset(rightMargin - 75, tagY - 6),
         TextStyle(
-          color: isCurrent ? const Color(0xff67d7b4) : const Color(0xff6b84a8),
-          fontSize: 8,
-          fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w500,
+          color: isCurrent
+              ? const Color(0xff67d7b4)
+              : isLabCurve
+                  ? const Color(0xff88c7b0)
+                  : const Color(0xff527299),
+          fontSize: 8.5,
+          fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+          backgroundColor: const Color(0xcc10262b),
         ),
       );
     }
@@ -198,13 +231,17 @@ class OutputCurvePainter extends CustomPainter {
       ..strokeWidth = 2.2;
     canvas.drawCircle(Offset(qX, qY), 4.5, qRing);
 
-    // Q-point badge
+    // Q-point badge (clamped safely within graph bounds)
     final badgeText = 'Q: ${currentVce.toStringAsFixed(1)}V, ${currentIcMa.toStringAsFixed(2)}mA';
-    final badgeX = (qX > rightMargin - 105) ? qX - 120 : qX + 10;
-    final badgeY = (qY < topMargin + 25) ? qY + 10 : qY - 22;
+    const badgeWidth = 118.0;
+    const badgeHeight = 18.0;
+    double badgeX = (qX > rightMargin - 125) ? qX - 130 : qX + 12;
+    double badgeY = (qY < topMargin + 25) ? qY + 12 : qY - 24;
+    badgeX = badgeX.clamp(leftMargin + 4, rightMargin - badgeWidth);
+    badgeY = badgeY.clamp(topMargin + 4, bottomMargin - badgeHeight);
 
     final badgeRRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(badgeX, badgeY, 115, 18),
+      Rect.fromLTWH(badgeX, badgeY, badgeWidth, badgeHeight),
       const Radius.circular(5),
     );
     canvas.drawRRect(badgeRRect, Paint()..color = const Color(0xee10262b));

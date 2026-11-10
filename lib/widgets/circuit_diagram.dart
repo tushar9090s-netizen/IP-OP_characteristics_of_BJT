@@ -30,9 +30,9 @@ class CircuitDiagramWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff17140c),
+        color: const Color(0xff111827),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xff3d3216)),
+        border: Border.all(color: const Color(0xff1e293b)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,13 +43,13 @@ class CircuitDiagramWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: isInputMode
-                      ? const Color(0xfffacc15).withValues(alpha: 0.15)
-                      : const Color(0xfff59e0b).withValues(alpha: 0.15),
+                      ? const Color(0xff38bdf8).withValues(alpha: 0.15)
+                      : const Color(0xff34d399).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.schema_rounded,
-                  color: isInputMode ? const Color(0xfffacc15) : const Color(0xfff59e0b),
+                  color: isInputMode ? const Color(0xff38bdf8) : const Color(0xff34d399),
                   size: 18,
                 ),
               ),
@@ -62,13 +62,13 @@ class CircuitDiagramWidget extends StatelessWidget {
                       isInputMode
                           ? 'Input Characteristics Circuit Diagram'
                           : 'Output Characteristics Circuit Diagram',
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Colors.white),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Color(0xfff1f5f9)),
                     ),
                     Text(
                       isInputMode
                           ? 'Lab Manual Image 2  ·  V1 (0-5V DC), R1 (1k), Q1 (BC547), V2 (1V, 2V)'
                           : 'Lab Manual Image 3  ·  V1 (5V DC), R1 (470k/1M), Q1 (BC547), R2 (1k), V2 (0-15V)',
-                      style: const TextStyle(fontSize: 10, color: Color(0xffbaa87e)),
+                      style: const TextStyle(fontSize: 10, color: Color(0xff94a3b8)),
                     ),
                   ],
                 ),
@@ -104,26 +104,26 @@ class CircuitDiagramWidget extends StatelessWidget {
                 reading: isInputMode
                     ? '${ibMa.toStringAsFixed(2)} mA  (${ibUa.toStringAsFixed(0)} µA)'
                     : '${ibUa.toStringAsFixed(1)} µA',
-                color: const Color(0xfff6ad55),
+                color: const Color(0xff38bdf8),
               ),
               const SizedBox(width: 8),
               _meterBadge(
                 title: 'Voltmeter (VBE)',
                 reading: '${vbe.toStringAsFixed(2)} V',
-                color: const Color(0xffe6a23c),
+                color: const Color(0xff818cf8),
               ),
               const SizedBox(width: 8),
               _meterBadge(
                 title: 'Voltmeter (VCE)',
                 reading: '${vce.toStringAsFixed(2)} V',
-                color: const Color(0xff67d7b4),
+                color: const Color(0xff60a5fa),
               ),
               if (!isInputMode) ...[
                 const SizedBox(width: 8),
                 _meterBadge(
                   title: 'Ammeter (IC)',
                   reading: '${icMa.toStringAsFixed(2)} mA',
-                  color: const Color(0xff48c79c),
+                  color: const Color(0xff34d399),
                 ),
               ],
             ],
@@ -138,14 +138,14 @@ class CircuitDiagramWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
         decoration: BoxDecoration(
-          color: const Color(0xff1e1a12),
+          color: const Color(0xff0f172a),
           borderRadius: BorderRadius.circular(9),
-          border: Border.all(color: color.withValues(alpha: 0.35)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(title, style: const TextStyle(fontSize: 8.5, color: Color(0xffbaa87e))),
+            Text(title, style: const TextStyle(fontSize: 8.5, color: Color(0xff94a3b8))),
             const SizedBox(height: 3),
             Text(
               reading,

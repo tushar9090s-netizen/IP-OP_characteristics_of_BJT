@@ -19,7 +19,7 @@ class BjtLabApp extends StatelessWidget {
     theme: ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xffeab308),
+        seedColor: const Color(0xff38bdf8),
         brightness: Brightness.dark,
       ),
       fontFamily: 'Arial',
@@ -73,10 +73,10 @@ class _LabHomeState extends State<LabHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff14120c),
+      backgroundColor: const Color(0xff0b0f19),
       bottomNavigationBar: NavigationBar(
-        backgroundColor: const Color(0xff1c180e),
-        indicatorColor: const Color(0xff4d3c12),
+        backgroundColor: const Color(0xff0f172a),
+        indicatorColor: const Color(0xff1e293b),
         selectedIndex: _page,
         onDestinationSelected: (value) => setState(() => _page = value),
         destinations: const [
@@ -147,10 +147,10 @@ class _LabHomeState extends State<LabHome> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xffd97706),
+                color: const Color(0xff1e3a8a),
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: const Icon(Icons.biotech_rounded, color: Colors.white, size: 26),
+              child: const Icon(Icons.biotech_rounded, color: Color(0xff60a5fa), size: 26),
             ),
             const SizedBox(width: 12),
             const Expanded(
@@ -162,13 +162,13 @@ class _LabHomeState extends State<LabHome> {
                     style: TextStyle(
                       letterSpacing: 2.2,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xfffacc15),
+                      color: Color(0xff38bdf8),
                       fontSize: 10.5,
                     ),
                   ),
                   Text(
                     'Input & Output Characteristics',
-                    style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: Colors.white),
+                    style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: Color(0xfff1f5f9)),
                   ),
                 ],
               ),
@@ -176,13 +176,13 @@ class _LabHomeState extends State<LabHome> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xff2e2510),
+                color: const Color(0xff1e293b),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xff5c491a)),
+                border: Border.all(color: const Color(0xff334155)),
               ),
               child: const Text(
                 'BC547 (NPN)',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xfffde047)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xff93c5fd)),
               ),
             ),
           ],
@@ -205,7 +205,7 @@ class _LabHomeState extends State<LabHome> {
               style: TextStyle(
                 fontSize: 12,
                 letterSpacing: 1.4,
-                color: Color(0xffcfbf94),
+                color: Color(0xff94a3b8),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -279,39 +279,44 @@ class _LabHomeState extends State<LabHome> {
           currentIbMa: _isInputMode ? currentIbMa : (_baseResistor.nominalIbUa / 1000.0),
           currentVbe: currentVbe,
           currentIcMa: currentIcMa,
+          onRecordingMade: () {
+            if (!_recordedObservation) {
+              setState(() => _recordedObservation = true);
+            }
+          },
         ),
       ],
     );
   }
 
   Widget _buildProgressCard() {
-    final progressPercent = (_progress * 100).toInt();
+    final progressPercent = (_progress * 100).round();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xff2a210f), Color(0xff1f180a)],
+          colors: [Color(0xff131d31), Color(0xff0f172a)],
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xff574418)),
+        border: Border.all(color: const Color(0xff1e293b)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.task_alt_rounded, color: Color(0xfffacc15), size: 20),
+              const Icon(Icons.task_alt_rounded, color: Color(0xff38bdf8), size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Experiment 5 Completion Status',
-                style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white, fontSize: 13.5),
+                style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xfff1f5f9), fontSize: 13.5),
               ),
               const Spacer(),
               Text(
                 '$progressPercent%',
                 style: const TextStyle(
-                  color: Color(0xfffde047),
+                  color: Color(0xff38bdf8),
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
@@ -324,8 +329,8 @@ class _LabHomeState extends State<LabHome> {
             child: LinearProgressIndicator(
               value: _progress,
               minHeight: 8,
-              backgroundColor: const Color(0xff181308),
-              valueColor: const AlwaysStoppedAnimation(Color(0xffeab308)),
+              backgroundColor: const Color(0xff1e293b),
+              valueColor: const AlwaysStoppedAnimation(Color(0xff38bdf8)),
             ),
           ),
           const SizedBox(height: 10),
@@ -335,7 +340,7 @@ class _LabHomeState extends State<LabHome> {
             children: [
               _checkBadge('Input Exp (V1, V2)', _exploredInput),
               _checkBadge('Output Exp (470k, 1M)', _exploredOutput),
-              _checkBadge('Result Tables Logged', true),
+              _checkBadge('Result Tables Logged', _recordedObservation),
               _checkBadge('Lab Checkpoint Quiz', _quizScore >= 3),
             ],
           ),
@@ -351,14 +356,14 @@ class _LabHomeState extends State<LabHome> {
         Icon(
           done ? Icons.check_circle : Icons.radio_button_unchecked,
           size: 13,
-          color: done ? const Color(0xfffacc15) : const Color(0xff736647),
+          color: done ? const Color(0xff38bdf8) : const Color(0xff475569),
         ),
         const SizedBox(width: 4),
         Text(
           label,
           style: TextStyle(
             fontSize: 11,
-            color: done ? const Color(0xfffef08a) : const Color(0xff968763),
+            color: done ? const Color(0xff93c5fd) : const Color(0xff64748b),
             fontWeight: done ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -379,12 +384,12 @@ class _LabHomeState extends State<LabHome> {
         : '${(dynamicRo / 1000).toStringAsFixed(1)} kΩ';
 
     return Container(
-      height: 330,
+      height: 380,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
-        color: const Color(0xff1e1a12),
+        color: const Color(0xff111827),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xff42371c)),
+        border: Border.all(color: const Color(0xff1e293b)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,14 +404,14 @@ class _LabHomeState extends State<LabHome> {
                       _isInputMode
                           ? 'Input Characteristics (Expected Graph - Image 3)'
                           : 'Output Characteristics (Expected Graph - Image 4)',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xfff1f5f9)),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       _isInputMode
                           ? 'IB vs VBE  ·  VCE = ${_inputVce.toInt()}V fixed  ·  ri ≈ $rStr'
                           : 'IC vs VCE  ·  IB = ${_baseResistor.nominalIbUa.toStringAsFixed(1)}µA (${_baseResistor.label})  ·  ro ≈ $rStr',
-                      style: const TextStyle(color: Color(0xffcfbf94), fontSize: 11),
+                      style: const TextStyle(color: Color(0xff94a3b8), fontSize: 11),
                     ),
                   ],
                 ),
@@ -414,7 +419,7 @@ class _LabHomeState extends State<LabHome> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: _isInputMode ? const Color(0x33facc15) : const Color(0x33f59e0b),
+                  color: _isInputMode ? const Color(0x2238bdf8) : const Color(0x2234d399),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -422,7 +427,7 @@ class _LabHomeState extends State<LabHome> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: _isInputMode ? const Color(0xfffacc15) : const Color(0xfff59e0b),
+                    color: _isInputMode ? const Color(0xff38bdf8) : const Color(0xff34d399),
                   ),
                 ),
               ),
@@ -467,23 +472,23 @@ class _LabHomeState extends State<LabHome> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff1e1a12),
+        color: const Color(0xff111827),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xff42371c)),
+        border: Border.all(color: const Color(0xff1e293b)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.tune_rounded, color: Color(0xfffacc15), size: 18),
+              const Icon(Icons.tune_rounded, color: Color(0xff38bdf8), size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   _isInputMode
                       ? 'Input Experiment Controls (Procedure Steps 2 & 3)'
                       : 'Output Experiment Controls (Procedure Steps 2, 3 & 4)',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Colors.white),
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Color(0xfff1f5f9)),
                 ),
               ),
             ],
@@ -499,7 +504,7 @@ class _LabHomeState extends State<LabHome> {
               children: [
                 const Text(
                   'VCE (V2) Setting:',
-                  style: TextStyle(color: Color(0xffede2c4), fontSize: 12.5, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: Color(0xffcbd5e1), fontSize: 12.5, fontWeight: FontWeight.w600),
                 ),
                 const Spacer(),
                 SegmentedButton<double>(
@@ -520,18 +525,18 @@ class _LabHomeState extends State<LabHome> {
               children: [
                 const Text(
                   'Input Voltage V1 (Vbb):',
-                  style: TextStyle(color: Color(0xffede2c4), fontSize: 12.5),
+                  style: TextStyle(color: Color(0xffcbd5e1), fontSize: 12.5),
                 ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xff362a10),
+                    color: const Color(0xff1e293b),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     '${_vbb.toStringAsFixed(1)} V  (0.5V steps)',
-                    style: const TextStyle(color: Color(0xfffacc15), fontWeight: FontWeight.bold, fontSize: 12),
+                    style: const TextStyle(color: Color(0xff38bdf8), fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
               ],
@@ -541,19 +546,19 @@ class _LabHomeState extends State<LabHome> {
               min: 0.0,
               max: 5.0,
               divisions: 10, // 0.5V increments
-              activeColor: const Color(0xfffacc15),
-              inactiveColor: const Color(0xff362d16),
+              activeColor: const Color(0xff38bdf8),
+              inactiveColor: const Color(0xff1e293b),
               label: '${_vbb.toStringAsFixed(1)} V',
               onChanged: (v) => setState(() => _vbb = v),
             ),
             const Row(
               children: [
-                Icon(Icons.info_outline, size: 15, color: Color(0xffbaa87e)),
+                Icon(Icons.info_outline, size: 15, color: Color(0xff64748b)),
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     'Procedure 3: Vary input voltage V1 in steps of 0.5V from 0V to 5V and observe IB and Vbe.',
-                    style: TextStyle(fontSize: 11.5, color: Color(0xffcfbf94)),
+                    style: TextStyle(fontSize: 11.5, color: Color(0xff94a3b8)),
                   ),
                 ),
               ],
@@ -572,7 +577,7 @@ class _LabHomeState extends State<LabHome> {
               children: [
                 const Text(
                   'Base Resistor R1 Selection:',
-                  style: TextStyle(color: Color(0xffede2c4), fontSize: 12.5, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: Color(0xffcbd5e1), fontSize: 12.5, fontWeight: FontWeight.w600),
                 ),
                 SegmentedButton<BaseResistorOption>(
                   style: SegmentedButton.styleFrom(
@@ -601,18 +606,18 @@ class _LabHomeState extends State<LabHome> {
               children: [
                 const Text(
                   'Collector Supply V2 (VCC):',
-                  style: TextStyle(color: Color(0xffede2c4), fontSize: 12.5),
+                  style: TextStyle(color: Color(0xffcbd5e1), fontSize: 12.5),
                 ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xff38270e),
+                    color: const Color(0xff1e293b),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     '${_vcc.toStringAsFixed(0)} V  (1V steps)',
-                    style: const TextStyle(color: Color(0xfff59e0b), fontWeight: FontWeight.bold, fontSize: 12),
+                    style: const TextStyle(color: Color(0xff34d399), fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
               ],
@@ -622,19 +627,19 @@ class _LabHomeState extends State<LabHome> {
               min: 1.0,
               max: 10.0,
               divisions: 9, // 1V increments
-              activeColor: const Color(0xfff59e0b),
-              inactiveColor: const Color(0xff362d16),
+              activeColor: const Color(0xff34d399),
+              inactiveColor: const Color(0xff1e293b),
               label: '${_vcc.toStringAsFixed(0)} V',
               onChanged: (v) => setState(() => _vcc = v),
             ),
             const Row(
               children: [
-                Icon(Icons.info_outline, size: 15, color: Color(0xffbaa87e)),
+                Icon(Icons.info_outline, size: 15, color: Color(0xff64748b)),
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     'Procedure 3: Vary VCC in steps of 1V from 1V to 10V and note the corresponding IC & VCE.',
-                    style: TextStyle(fontSize: 11.5, color: Color(0xffcfbf94)),
+                    style: TextStyle(fontSize: 11.5, color: Color(0xff94a3b8)),
                   ),
                 ),
               ],

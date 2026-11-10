@@ -40,10 +40,15 @@ void main() {
     test('Dynamic Input Resistance and Output Resistance calculations', () {
       final ri = BjtPhysics.calculateDynamicInputResistance(vbb: 2.0, vce: 1.0);
       final ro = BjtPhysics.calculateDynamicOutputResistance(vcc: 5.0, ibUa: 10.0);
+      final betaDc = BjtPhysics.calculateBetaDc(icMa: 2.3, ibUa: 10.0);
+      final betaAc = BjtPhysics.calculateBetaAc(vcc: 5.0, ibUa: 10.0);
 
       expect(ri, greaterThan(10.0));
       expect(ri, lessThan(5000.0));
       expect(ro, greaterThan(10000.0));
+      expect(betaDc, greaterThan(200.0));
+      expect(betaAc, greaterThan(150.0));
+      expect(betaAc, lessThan(350.0));
     });
 
     test('Standard Result Tables generation', () {
@@ -131,6 +136,77 @@ void main() {
 
       expect(find.text('CONCEPT CHECK'), findsOneWidget);
       expect(find.text('BJT Checkpoint Quiz'), findsOneWidget);
+    });
+
+    testWidgets('Progress updates dynamically and reaches 100% upon completing all checkpoints', (tester) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const BjtLabApp());
+      await tester.pumpAndSettle();
+
+      // Initially at 70% (60% base + 10% explored input)
+      expect(find.text('70%'), findsOneWidget);
+
+      // Explore output mode (+10% -> 80%)
+      await tester.tap(find.text('Output (IC vs VCE)'));
+      await tester.pumpAndSettle();
+      expect(find.text('80%'), findsOneWidget);
+
+      // Record reading (+10% -> 90%)
+      await tester.ensureVisible(find.text('Record Active Reading'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Record Active Reading'));
+      await tester.pumpAndSettle();
+      // Scroll back up to progress card if needed
+      await tester.ensureVisible(find.text('Experiment 5 Completion Status'));
+      await tester.pumpAndSettle();
+      expect(find.text('90%'), findsOneWidget);
+
+      // Complete Quiz with >= 3 correct (+10% -> 100%)
+      await tester.tap(find.byIcon(Icons.quiz_outlined));
+      await tester.pumpAndSettle();
+
+      // Answer questions (index 1 is correct for questions 0 to 4, index 2 is correct for question 5)
+      // Tap correct answers for all questions
+      // Q1 (BC547 NPN): option 1
+      await tester.tap(find.text('BC547 NPN'));
+      await tester.pumpAndSettle();
+
+      // Q2 (0.6 V to 0.7 V): option 1
+      await tester.tap(find.text('0.6 V to 0.7 V'));
+      await tester.pumpAndSettle();
+
+      // Q3 (To set the base current IB precisely to 4.3 µA): option 1
+      await tester.tap(find.text('To set the base current IB precisely to 4.3 µA'));
+      await tester.pumpAndSettle();
+
+      // Q4 (ri = ΔVBE / ΔIB (at constant VCE)): option 1
+      await tester.tap(find.text('ri = ΔVBE / ΔIB (at constant VCE)'));
+      await tester.pumpAndSettle();
+
+      // Q5 (βac = (ΔIC / ΔIB) at constant VCE): option 1
+      await tester.tap(find.text('βac = (ΔIC / ΔIB) at constant VCE'));
+      await tester.pumpAndSettle();
+
+      // Q6 (Saturation Region): option 2
+      await tester.tap(find.text('Saturation Region'));
+      await tester.pumpAndSettle();
+
+      // Submit Quiz
+      await tester.tap(find.text('Submit Quiz'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your Score: 6 / 6'), findsOneWidget);
+
+      // Return to Explore tab
+      await tester.tap(find.text('Explore'));
+      await tester.pumpAndSettle();
+
+      // Progress should now be 100%
+      expect(find.text('100%'), findsOneWidget);
     });
   });
 }

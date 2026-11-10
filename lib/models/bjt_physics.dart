@@ -1,7 +1,5 @@
 import 'dart:math' as math;
 
-enum TransistorPolarity { npn, pnp }
-
 enum BaseResistorOption {
   oneMega('1 MΩ', 1000000.0, 4.3),
   fourSeventyK('470 kΩ', 470000.0, 10.0);
@@ -60,8 +58,8 @@ class BjtPhysics {
     required double vbb,
     required double vce, // 1.0 or 2.0 V
   }) {
-    // Early effect shift: at Vce = 2V, depletion region widens, curve shifts slightly right
-    final vceShift = 0.008 * (vce - 1.0);
+    // Early effect shift: at Vce = 2V, base width narrows, knee shifts right (~0.055V visible distinction)
+    final vceShift = 0.055 * (vce - 1.0);
 
     if (vbb <= 0.0) {
       return {'vbe': 0.0, 'ibMa': 0.0, 'ibUa': 0.0};
@@ -179,6 +177,27 @@ class BjtPhysics {
   static double calculateBetaDc({required double icMa, required double ibUa}) {
     if (ibUa <= 0.01) return 0.0;
     return (icMa * 1000.0) / ibUa;
+  }
+
+  /// AC Beta: beta_ac = (ΔIC / ΔIB) at constant VCE
+  /// Evaluated by comparing output curves at two nearby IB values
+  static double calculateBetaAc({
+    required double vcc,
+    required double ibUa,
+  }) {
+    final deltaIb = 1.0; // 1 µA perturbation
+    final ib1 = math.max(0.1, ibUa - deltaIb);
+    final ib2 = ibUa + deltaIb;
+
+    final sol1 = solveOutputCircuit(vcc: vcc, ibUa: ib1);
+    final sol2 = solveOutputCircuit(vcc: vcc, ibUa: ib2);
+
+    final dIcMa = sol2['icMa']! - sol1['icMa']!;
+    final dIbUa = ib2 - ib1;
+
+    if (dIbUa <= 0.0) return 0.0;
+    // ΔIC (in µA) / ΔIB (in µA) = ΔIC_mA * 1000 / ΔIB_µA
+    return (dIcMa * 1000.0) / dIbUa;
   }
 
   /// Generates the complete standard Result Table for Input Characteristics (Page 2)
